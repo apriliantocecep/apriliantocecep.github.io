@@ -53,22 +53,26 @@
     fetch(action, {
       method: 'POST',
       body: formData,
+      headers: {
+        'Accept': 'application/json'
+      },
       headers: {'X-Requested-With': 'XMLHttpRequest'}
     })
     .then(response => {
       if( response.ok ) {
-        return response.text()
+        return response.json()
       } else {
         throw new Error(`${response.status} ${response.statusText} ${response.url}`); 
       }
     })
     .then(data => {
+      // console.log('data form', data)
       thisForm.querySelector('.loading').classList.remove('d-block');
-      if (data.trim() == 'OK') {
+      if (data.ok) {
         thisForm.querySelector('.sent-message').classList.add('d-block');
         thisForm.reset(); 
       } else {
-        throw new Error(data ? data : 'Form submission failed and no error message returned from: ' + action); 
+        throw new Error('Oops! There was a problem submitting your form'); 
       }
     })
     .catch((error) => {
@@ -82,4 +86,27 @@
     thisForm.querySelector('.error-message').classList.add('d-block');
   }
 
+  // new form
+  var form = document.getElementById("my-formXX");
+  async function handleSubmit(event) {
+    event.preventDefault();
+    form.querySelector('.loading').classList.add('d-block');
+    form.querySelector('.error-message').classList.remove('d-block');
+    form.querySelector('.sent-message').classList.remove('d-block');
+    var data = new FormData(event.target);
+    fetch(event.target.action, {
+      method: form.method,
+      body: data,
+      headers: {
+          'Accept': 'application/json'
+      }
+    }).then(response => {
+      form.querySelector('.loading').classList.remove('d-block');
+      form.querySelector('.sent-message').classList.add('d-block');
+      form.reset()
+    }).catch(error => {
+      displayError(form, error);
+    });
+  }
+  form.addEventListener("submit", handleSubmit)
 })();
